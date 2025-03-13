@@ -3,33 +3,18 @@ from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOpe
 from datetime import datetime
 
 default_args = {
-    'start_date': datetime(2024, 3, 1),
-    'catchup': False
+    'owner': 'airflow',
+    'start_date': datetime(2023, 1, 1),
 }
 
-with DAG('spark_dag',
+with DAG('spark_example',
          default_args=default_args,
          schedule_interval=None,
-         tags=['spark']) as dag:
+         catchup=False) as dag:
 
-    spark_job = SparkSubmitOperator(
-        task_id='run_spark_job',
-        application='local:///opt/airflow/dags/submit.py',
+    submit_job = SparkSubmitOperator(
+        task_id='submit_my_spark_job',
+        application='/opt/airflow/spark/task.py',
         conn_id='spark_local',
-        verbose=True,
-        conf={
-            "spark.driver.memory": "4g",
-            "spark.executor.memory": "4g",
-            "spark.network.timeout": "1000s",
-            "spark.rpc.message.maxSize": "512",
-            "spark.driver.maxResultSize": "2g",
-            "spark.sql.broadcastTimeout": "3000",
-            "spark.executor.heartbeatInterval": "100s",
-            "spark.shuffle.io.maxRetries": "10",
-            "spark.shuffle.io.retryWait": "10s",
-            "spark.core.connection.ack.wait.timeout": "600s"
-        },
-        dag=dag
+        name='Spark Job'
     )
-
-    spark_job
